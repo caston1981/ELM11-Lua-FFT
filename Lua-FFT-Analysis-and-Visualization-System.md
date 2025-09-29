@@ -134,7 +134,7 @@ Implement classical Fourier series:
 ```
 project/
 ├── main.lua                 # LÖVE2D entry point
-├── fft/
+├── fourier/
 │   ├── init.lua            # FFT module loader
 │   ├── luafft_wrapper.lua  # LuaFFT implementation
 │   └── fftw3_wrapper.lua   # FFTW3 bindings (optional)
@@ -201,6 +201,110 @@ project/
 3. Example signals and demo scenarios
 4. User guide with screenshots
 5. Configuration templates for different microcontrollers
+
+## Current Implementation Status
+
+### Python Development Interfaces
+
+#### shim_interface.py - PC Testing Interface
+**Purpose**: Development and testing environment that runs on PC without requiring hardware.
+
+**Key Features**:
+- **Dual Mode Operation**: Choose between Python (NumPy/Matplotlib) or Lua execution
+- Full visualization with matplotlib plots (Python mode) showing:
+  - Time domain waveform
+  - Frequency domain spectrum
+  - Fourier series reconstruction comparison
+  - Harmonic coefficient analysis
+- Text-based output for Lua mode (same code as ELM11)
+- Signal generation (sine, square, sawtooth, triangle waves)
+- FFT analysis with frequency detection
+- Fourier series reconstruction and THD calculation
+- Real-time simulation with changing frequencies
+
+**Usage**:
+```bash
+python3 shim_interface.py
+```
+
+#### elm11_interface.py - Hardware Control Interface
+**Purpose**: PC-side interface for communicating with and controlling the ELM11 microcontroller hardware.
+
+**Key Features**:
+- Serial communication with ELM11 microcontroller
+- Lua code loading and execution on hardware
+- Command-line menu for FFT operations
+- Hardware status monitoring
+- Real-time data transfer between PC and microcontroller
+- Interactive Lua code runner for FFT-focused commands
+- Command mode access for advanced ELM11 operations
+
+**Usage**:
+```bash
+python3 elm11_interface.py
+```
+
+**Functions**:
+- `load_fft_lua_code()`: Transfers Lua FFT code to ELM11
+- `run_fft_analysis()`: Executes FFT analysis commands on hardware
+- `get_hardware_status()`: Monitors microcontroller state
+- Interactive menu for signal generation, analysis, and visualization
+
+### Current Fourier Folder Structure
+
+The `fourier/` directory contains the Lua implementation that runs on the ELM11 microcontroller:
+
+```
+fourier/
+├── init.lua               # Core FFT functions, signal generation, and constants
+└── fourier_main.lua       # LÖVE2D visualization application (in development)
+```
+
+#### init.lua - Core Implementation
+**Current Features**:
+- Configuration constants (SAMPLE_RATE = 48000, BUFFER_SIZE = 1024, FFT_SIZE = 512)
+- Signal generation functions: `generate_sine()`, `generate_square()`, `generate_sawtooth()`, `generate_triangle()`
+- Simplified FFT computation (mock implementation for testing)
+- Fourier series coefficient extraction: `get_fourier_series()`
+- Signal reconstruction from coefficients: `reconstruct_signal()`
+- Global state variables for current signal, FFT results, and coefficients
+
+**Expansion Plans**:
+- Replace mock FFT with real LuaFFT implementation
+- Add window functions (Hamming, Hanning, Blackman)
+- Implement inverse FFT capability
+- Add power spectral density calculation
+- Support variable buffer sizes and zero-padding
+- Add coefficient precision and numerical stability improvements
+
+#### fourier_main.lua - LÖVE2D Visualization
+**Current Features**:
+- LÖVE2D framework setup with window management
+- Hardware GPIO and ADC initialization (planned)
+- Real-time signal processing framework
+- Multiple display modes: time domain, frequency domain, waterfall, Fourier series
+- Basic plotting functions for waveforms and spectra
+- UI controls and keyboard input handling
+- Signal generation functions for testing
+
+**Expansion Plans**:
+- Complete hardware sensor integration (ADC, GPIO)
+- Implement full visualization components as planned
+- Add interactive controls (zoom, pan, scaling)
+- Implement waterfall/spectrogram with historical data
+- Add phase plot and unwrapped phase display
+- Professional visual styling with dark theme
+- Real-time performance metrics and FPS display
+- Export functionality for data and screenshots
+
+### Development Workflow
+
+1. **Develop in shim_interface.py** (Lua mode) - Test algorithms without hardware
+2. **Deploy to ELM11** via elm11_interface.py - Run on actual microcontroller
+3. **Unified Codebase** - Same Lua functions work on both PC and hardware
+4. **Expand fourier/ modules** - Implement planned features incrementally
+
+This approach ensures algorithms work identically across development and production environments.
 
 ## Optional Enhancements
 - Real-time filtering (low-pass, high-pass, band-pass)
